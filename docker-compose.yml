@@ -1,0 +1,36 @@
+services:
+  backend:
+    build:
+      context: ./Legendary/backend
+      dockerfile: Dockerfile
+    container_name: legendary_backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./Legendary/backend:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+    networks:
+      - legendary-network
+
+  frontend:
+    build:
+      context: ./Legendary/frontend
+      dockerfile: Dockerfile
+    container_name: legendary_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./Legendary/frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - legendary-network
+
+networks:
+  legendary-network:
+    driver: bridge
