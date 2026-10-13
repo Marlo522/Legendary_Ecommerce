@@ -28,6 +28,8 @@ Do not assume that a missing page means the entire feature is missing. Search fo
 - Keep unrelated user changes intact.
 - Do not overwrite or delete files without a clear reason.
 - Use descriptive names and consistent folder organization.
+- Do not use emojis in the code or in the commit messages.
+- Use icons instead of emojis.
 - Keep presentation, business logic, API communication, and data validation separated.
 - Avoid duplicated constants, API URLs, formatting logic, and validation rules.
 - Avoid unnecessary dependencies.
