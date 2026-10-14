@@ -6,7 +6,11 @@ import { useState } from 'react';
  * utility actions (Search, Wishlist, Account, Cart).
  * Mobile: logo + cart + hamburger, drawer for nav.
  */
-export default function Header() {
+export default function Header({
+  onOpenAuth = () => {},
+  currentUser = null,
+  onLogout = () => {},
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navLinks = [
@@ -77,17 +81,31 @@ export default function Header() {
               </svg>
             </button>
 
-            {/* Account — hidden on mobile */}
-            <button
-              id="account-btn"
-              aria-label="Account"
-              className="hidden lg:block text-brand-black hover:text-brand-gray transition-colors"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </button>
+            {/* Account / Sign In — Desktop */}
+            <div className="hidden lg:flex items-center gap-2">
+              <button
+                id="account-btn"
+                aria-label={currentUser ? `Account: ${currentUser.name}` : 'Sign In or Register'}
+                onClick={() => (currentUser ? onLogout() : onOpenAuth('login'))}
+                className="flex items-center gap-2 text-brand-black hover:text-brand-gray transition-colors"
+                title={currentUser ? 'Click to sign out' : 'Sign in / Register'}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                <span className="text-[0.6875rem] font-medium tracking-[0.1em] uppercase">
+                  {currentUser ? (
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-brand-success"></span>
+                      {currentUser.name}
+                    </span>
+                  ) : (
+                    'Sign In'
+                  )}
+                </span>
+              </button>
+            </div>
 
             {/* Cart */}
             <button
@@ -149,9 +167,21 @@ export default function Header() {
             </a>
           ))}
           <div className="flex gap-6 pt-4 border-t border-brand-line">
-            <a href="#" className="text-sm font-medium tracking-[0.1em] uppercase text-brand-black hover:text-brand-gray transition-colors">
-              Account
-            </a>
+            <button
+              id="mobile-account-btn"
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                if (currentUser) {
+                  onLogout();
+                } else {
+                  onOpenAuth('login');
+                }
+              }}
+              className="text-sm font-medium tracking-[0.1em] uppercase text-brand-black hover:text-brand-gray transition-colors text-left"
+            >
+              {currentUser ? `Sign Out (${currentUser.name})` : 'Sign In / Register'}
+            </button>
             <a href="#" className="text-sm font-medium tracking-[0.1em] uppercase text-brand-black hover:text-brand-gray transition-colors">
               Wishlist
             </a>

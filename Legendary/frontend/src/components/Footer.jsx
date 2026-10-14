@@ -2,8 +2,10 @@
  * Footer — Site footer with links and social media.
  * Design.md §7 homepage order item 10: "Footer with links and social media."
  */
+const CURRENT_YEAR = new Date().getFullYear();
+
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+  const currentYear = CURRENT_YEAR;
 
   const footerColumns = [
     {
