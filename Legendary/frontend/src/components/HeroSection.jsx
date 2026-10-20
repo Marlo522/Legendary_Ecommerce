@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import heroImg from '../assets/hero-lifestyle.jpg';
 
 /**
@@ -27,15 +28,15 @@ export default function HeroSection() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <a
-                href="#"
+              <Link
+                to="/shop"
                 id="hero-cta-primary"
                 className="inline-flex items-center justify-center bg-brand-black text-brand-white
                            px-8 py-4 text-[0.75rem] font-semibold tracking-[0.15em] uppercase
                            hover:bg-brand-gray transition-colors duration-300"
               >
                 Shop the collection
-              </a>
+              </Link>
               <a
                 href="#"
                 id="hero-cta-secondary"
@@ -55,6 +56,7 @@ export default function HeroSection() {
               alt="Person wearing Legendary Lifestyle black t-shirt, cap, and tote bag"
               className="w-full h-full object-cover object-top min-h-[50vh] lg:min-h-full"
               loading="eager"
+              fetchPriority="high"
             />
             {/* Editorial overlay detail */}
             <div className="absolute bottom-6 right-6 lg:bottom-10 lg:right-10">

@@ -109,3 +109,24 @@
 .animate-fadeIn {
   animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@layer components {
+  .button-primary {
+    @apply inline-flex min-h-11 items-center justify-center border border-brand-black bg-brand-black px-5 py-3 text-xs font-semibold uppercase tracking-wider text-brand-white transition-colors hover:bg-brand-white hover:text-brand-black disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .button-secondary {
+    @apply inline-flex min-h-10 items-center justify-center border border-brand-line bg-brand-white px-4 py-2 text-xs font-medium transition-colors hover:border-brand-black disabled:cursor-not-allowed disabled:opacity-40;
+  }
+  .form-label { @apply mb-2 block text-xs font-semibold uppercase tracking-wider; }
+  .form-input { @apply min-h-11 w-full rounded-none border border-brand-line bg-brand-white px-3 py-2 text-sm outline-none focus:border-brand-black focus:ring-1 focus:ring-brand-black disabled:opacity-60; }
+  .data-table { @apply w-full border-collapse text-left text-sm; }
+  .data-table thead th { @apply border-b border-brand-line bg-brand-paper px-4 py-3 text-[0.65rem] font-semibold uppercase tracking-wider text-brand-gray; }
+  .data-table tbody th, .data-table tbody td { @apply border-b border-brand-line px-4 py-4 align-top; }
+  .data-table tbody tr:last-child th, .data-table tbody tr:last-child td { @apply border-b-0; }
+}
+:focus-visible { outline: 2px solid var(--color-brand-black); outline-offset: 4px; }
+.skip-link { position: fixed; top: 0.5rem; left: 0.5rem; z-index: 100; padding: 0.75rem 1rem; background: white; color: black; transform: translateY(-160%); }
+.skip-link:focus { transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

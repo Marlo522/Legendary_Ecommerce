@@ -2,20 +2,22 @@
  * Footer — Site footer with links and social media.
  * Design.md §7 homepage order item 10: "Footer with links and social media."
  */
+import { Link } from 'react-router';
+import { useStorefront } from '../hooks/useStorefront';
+
 const CURRENT_YEAR = new Date().getFullYear();
 
 export default function Footer() {
   const currentYear = CURRENT_YEAR;
+  const { metadata } = useStorefront();
 
   const footerColumns = [
     {
       title: 'Shop',
       links: [
-        { label: 'All Products', href: '#' },
-        { label: 'T-shirts', href: '#' },
-        { label: 'Caps', href: '#' },
-        { label: 'Tote Bags', href: '#' },
-        { label: 'New Arrivals', href: '#' },
+        { label: 'All Products', href: '/shop' },
+        ...(metadata.data?.data.categories || []).map(category => ({ label: category.name, href: '/shop?category=' + encodeURIComponent(category.slug) })),
+        { label: 'New Arrivals', href: '/shop?collection=new-arrivals' },
       ],
     },
     {
@@ -31,10 +33,10 @@ export default function Footer() {
     {
       title: 'Account',
       links: [
-        { label: 'Sign In', href: '#' },
+        { label: 'Sign In', href: '/login' },
         { label: 'Register', href: '#' },
         { label: 'Order Tracking', href: '#' },
-        { label: 'Wishlist', href: '#' },
+        { label: 'Wishlist', href: '/account/wishlist' },
       ],
     },
   ];
@@ -85,12 +87,12 @@ export default function Footer() {
               <ul className="flex flex-col gap-3">
                 {col.links.map((link) => (
                   <li key={link.label}>
-                    <a
-                      href={link.href}
+                    <Link
+                      to={link.href}
                       className="text-sm text-white/60 hover:text-brand-white transition-colors duration-200"
                     >
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
