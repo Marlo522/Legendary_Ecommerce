@@ -189,3 +189,42 @@ The design is ready when:
 - At least three pages use the signature editorial language without sacrificing usability.
 - The homepage does not look like a default Tailwind, Shopify, or AI-generated template.
 - Product photography and text feel specific to Legendary Lifestyle rather than generic fashion content.
+13. Backend Folder Structure
+backend/
+controllers/
+Handles HTTP requests and responses
+
+routes/
+Defines API endpoints
+
+middlewares/
+Validates or intercepts requests
+
+services/
+Contains business logic
+
+utils/
+Reusable helper functions
+
+models/
+Database models and data structures
+
+validators/
+Validates incoming data
+
+config/
+Database and external service setup
+
+repositories/
+Handles database queries
+
+jobs/
+Background and scheduled tasks
+
+
+.env
+Environment variables
+14. Technologies used
+Backend - Laravel
+Database - Supabase
+Frontend - Tailwind-Reactjs

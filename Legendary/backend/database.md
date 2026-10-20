@@ -41,11 +41,11 @@ BEGIN
         NEW.id,
         NEW.email,
         COALESCE(NEW.raw_user_meta_data->>'name', SPLIT_PART(NEW.email, '@', 1)),
-        COALESCE(NEW.raw_user_meta_data->>'role', 'customer')
+        'customer'
     );
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 CREATE OR REPLACE TRIGGER on_auth_user_created
     AFTER INSERT ON auth.users
@@ -329,7 +329,7 @@ BEGIN
         WHERE id = auth.uid() AND role = 'admin'
     );
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
 
 -- --------------------------------------------------------
 -- Policies: users
@@ -342,6 +342,10 @@ CREATE POLICY "Users can update own profile" ON public.users
     FOR UPDATE USING (auth.uid() = id OR public.is_admin());
 
 -- --------------------------------------------------------
+-- Protect role and identity columns on profile updates.
+REVOKE UPDATE ON public.users FROM PUBLIC, anon, authenticated;
+GRANT UPDATE (name, phone, avatar_url, updated_at) ON public.users TO authenticated;
+
 -- Policies: addresses
 -- --------------------------------------------------------
 CREATE POLICY "Users manage own addresses" ON public.addresses
@@ -543,7 +547,7 @@ DB_SSLMODE=require
 # Found in Project Settings -> API
 SUPABASE_URL=https://fpqdpqnzyxizdvrwytfp.supabase.co
 SUPABASE_PUBLISHABLE_KEY=sb_publishable_qjKIT_kEcHRo_Wa5T_pLAQ_mBJN0pAp
-SUPABASE_SECRET_KEY=sb_secret_ccBUnRG82X3zJ2WIUz72Lg_ozfR9loo
+SUPABASE_SECRET_KEY=YOUR_SERVER_ONLY_SECRET_KEY
 SUPABASE_JWKS_URL=https://fpqdpqnzyxizdvrwytfp.supabase.co/auth/v1/.well-known/jwks.json
 ```
 
@@ -566,3 +570,16 @@ VITE_API_BASE_URL=http://127.0.0.1:8000/api
 VITE_SUPABASE_URL=https://fpqdpqnzyxizdvrwytfp.supabase.co
 VITE_SUPABASE_ANON_KEY=sb_publishable_qjKIT_kEcHRo_Wa5T_pLAQ_mBJN0pAp
 ```
+
+
+## Laravel login API
+
+The API uses Supabase Auth and PostgREST with encrypted Laravel server sessions. Customer authentication does not use the secret/service-role key. See README.md for setup and API contracts.
+
+Apply database/sql/secure_auth_profiles.sql to existing databases in Supabase SQL editor. The corrected schema above gives new databases the same protections. Audit existing admin roles if the previous signup trigger was used; this patch does not change existing accounts.
+
+A secret key previously appeared in this tracked guide. Rotate it in Supabase and update legitimate server consumers; deleting it here does not remove it from Git history.
+
+The legacy Laravel migrations use integer user IDs and password columns rather than this schema's UUID profiles linked to auth.users. Do not run those migrations against the Supabase schema. Login does not need local user, cache, or session database tables.
+
+The frontend example above applies to direct Supabase clients. For Laravel cookie sessions use VITE_API_BASE_URL=http://localhost:8000/api, credentials: 'include', and the CSRF flow in README.md. Use the same hostname for frontend and backend during development.
