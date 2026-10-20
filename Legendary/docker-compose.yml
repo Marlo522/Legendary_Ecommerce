@@ -4,11 +4,14 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: legendary_backend
+    command: ["sh", "-c", "composer install --no-interaction --prefer-dist --no-scripts && exec php artisan serve --host=0.0.0.0 --port=8000"]
     restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/var/www/html
+      - backend-vendor:/var/www/html/vendor
+      - ./backend/php-development.ini:/usr/local/etc/php/conf.d/zz-development.ini:ro
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -26,10 +29,15 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    environment:
+      - API_PROXY_TARGET=http://backend:8000
     depends_on:
       - backend
     networks:
       - legendary-network
+
+volumes:
+  backend-vendor:
 
 networks:
   legendary-network:

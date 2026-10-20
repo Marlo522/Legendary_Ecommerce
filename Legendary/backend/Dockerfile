@@ -18,7 +18,12 @@ RUN apk add --no-cache \
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+COPY php-development.ini /usr/local/etc/php/conf.d/zz-development.ini
+
 WORKDIR /var/www/html
+
+COPY composer.json composer.lock ./
+RUN composer install --no-interaction --prefer-dist --no-scripts
 
 EXPOSE 8000
 
