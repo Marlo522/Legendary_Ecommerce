@@ -145,3 +145,65 @@ The initial bag at /cart stores variant IDs and quantities in the encrypted Lara
 Wishlist writes use the authenticated user ID and access token, with Supabase RLS enforcement. Saving is idempotent and removal is scoped to the authenticated user. Guests are sent to login and return to the product after signing in.
 
 For verification, run `composer validate --no-check-publish` and inspect routes with `php artisan route:list --path=api --except-vendor`. In frontend, run `npm run lint` and `npm run build`, then check the running storefront.
+
+## Admin products, inventory, and orders
+
+Before using these screens, apply database/sql/admin_management.sql in the Supabase SQL editor after the existing schema and secure_auth_profiles.sql. It is repeatable and adds the deleted_at column, database checks, and the two atomic order functions. Do not run the legacy Laravel migrations against Supabase. Order reads support older databases missing deleted_at; once the patch is applied, they automatically exclude deleted orders. Admin order mutations require the full patch.
+
+For product uploads, run php artisan storage:link in the environment serving Laravel and set APP_URL to the browser-accessible backend origin. For the running Docker setup, use docker compose exec backend php artisan storage:link. Uploaded JPEG, PNG, and WebP files are limited to 5 MB and require an image description. Persist storage/app/public and expose public/storage when deploying.
+
+Every endpoint below requires an authenticated administrator, the existing Laravel session cookie, and a CSRF token for writes. Laravel checks the role before executing the action; Supabase requests use the administrator's access token and the publishable key. Order functions also check public.is_admin() inside PostgreSQL. No service-role key is used.
+
+| Method | Path after /api/admin | Body / result |
+| --- | --- | --- |
+| GET | /categories | Supported category choices in data |
+| GET | /products | data and meta; page, per_page, search (product name), status |
+| GET | /products/{id} | data: product including all variants and images |
+| POST | /products | Product fields; 201 with data |
+| PUT | /products/{id} | Product fields and updated_at; 200 with data |
+| DELETE | /products/{id} | updated_at; 204 |
+| POST | /products/{id}/variants | Variant fields; 201 with data |
+| PUT | /products/{id}/variants/{variant} | Variant fields and updated_at; 200 with data |
+| DELETE | /products/{id}/variants/{variant} | updated_at; 204 |
+| POST | /products/{id}/images | Multipart image, alt_text, display_order; 201 with data |
+| PUT | /products/{id}/images/{image} | alt_text, display_order, updated_at; 200 with data |
+| DELETE | /products/{id}/images/{image} | updated_at; 204 |
+| GET | /orders | data and meta; page, per_page, search (order number, guest name/email), status |
+| GET | /orders/{id} | data including item snapshots, payment, delivery, notes, updated_at |
+| POST | /orders | Order fields; 201 with data |
+| PUT | /orders/{id} | Order fields and updated_at; 200 with data |
+| DELETE | /orders/{id} | updated_at; 204; retains the order and items for reporting |
+
+Product fields: name, URL-safe lowercase slug, category_id, base_price, optional sale_price/description/material/care_instructions, status (draft, active, archived), is_featured, is_new_arrival. Category must be T-shirts, Caps, or Tote Bags. Sale price cannot exceed base price.
+
+Variant fields: color, optional color_hex/size/price_override, unique sku, stock_quantity, low_stock_threshold, is_active. Stock and thresholds must be nonnegative integers. Updates and deletes include the exact updated_at from the read response to reject stale inventory changes. Products and variants referenced by orders cannot be physically deleted; archive the product or deactivate the variant.
+
+Order fields: guest_name, guest_email, guest_phone, shipping_address, status, payment_method, payment_status, shipping_fee, discount_amount, optional notes, items. Each item contains only variant_id and quantity (1–99), with at most 50 distinct variants. Delivery requires recipient_name, phone, address_line_1, city, province, postal_code, two-letter country, and optional address_line_2. Existing customer-account linkage is retained when an admin edits its order.
+
+Administrators may set shipping and a manual discount; the server validates both, caps the discount at the subtotal, calculates all item prices and totals, and generates a unique order number. Browser price previews are not submitted. Variant price overrides take precedence over sale/base price. Existing order items retain their original unit prices when quantities change.
+
+New orders start pending or confirmed. Fulfillment advances pending → confirmed → packed → shipped → completed; pending, confirmed, and packed can also be cancelled. Cancelled/completed states are terminal. Paid payments may only advance to refunded; they cannot revert to pending to unlock item editing. Items and amounts become fixed after payment, shipment, completion, or cancellation. Only unpaid pending/cancelled orders can be deleted. Deletion hides the retained record from account/admin lists and detail reads. Cancellation restores stock once; deleting an already-cancelled order does not restore it twice.
+
+Order creation, edits, cancellation, and deletion run in PostgreSQL transactions, locking the order and affected variants in a stable order. Insufficient stock or invalid totals roll back the complete operation. Inventory changes and order writes invalidate the public catalog cache.
+
+Responses: 401 for a missing/expired session, 403 for a non-admin or unauthorized provider operation, 404 for a missing product/order or a variant/image belonging to another product, 409 for a stale version or a record referenced by another record, 422 with message and errors for invalid input or stock/status failures, and a safe 503 on provider failure. Deleted/missing records encountered during a conditional write return 409. Pagination uses meta: {page, per_page, total, last_page}; default 12, maximum 50. Search accepts letters, numbers, spaces, @, periods, and hyphens.
+
+### Verification
+
+The repository does not currently install PHPUnit through Composer. The feature tests can use a standalone PHPUnit 12 PHAR without changing dependencies:
+
+~~~powershell
+Invoke-WebRequest https://phar.phpunit.de/phpunit-12.phar -OutFile storage/framework/testing/phpunit.phar
+php storage/framework/testing/phpunit.phar --bootstrap tests/bootstrap.php --no-configuration tests/Feature/AdminManagementTest.php
+~~~
+
+The API tests fake Supabase HTTP and prevent stray requests. tests/Feature/admin_management.sql separately tests the real PostgreSQL functions using fixtures and rolls back its changes. Run it with psql -v ON_ERROR_STOP=1 -f tests/Feature/admin_management.sql against a disposable database containing database.md, secure_auth_profiles.sql, and admin_management.sql; it expects the Supabase auth.users table and auth.uid() function. Never run test fixtures against the store database.
+
+In frontend, run npm run build, npm run lint, and node --test src/services/adminForms.test.js src/services/resourceCache.test.js. With the Vite server running, node --test src/services/adminBrowser.test.js uses the installed Microsoft Edge in headless mode; set ADMIN_TEST_BROWSER for another Chromium executable and ADMIN_TEST_URL for another frontend URL. Browser tests stub API responses within the test page and cover forms, duplicate submissions, upload requests, and responsive layouts. They do not modify store data.
+
+The standard php artisan test --compact command currently fails because the repository does not install PHPUnit's runtime dependencies (SebastianBergmann\Environment\Console). The standalone runner above is the verified alternative.
+
+
+## Cloudinary and Redis
+
+Follow [the step-by-step Cloudinary and Redis guide](../CLOUDINARY_REDIS_SETUP.md) for credentials, admin uploads, local Docker caching, hosted Redis, verification, and troubleshooting. PRODUCT_IMAGE_STORAGE defaults to local; select cloudinary to use the integrated server-side uploader. Redis is an optional Compose cache profile.

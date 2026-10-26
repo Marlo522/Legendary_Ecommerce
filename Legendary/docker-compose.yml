@@ -4,7 +4,7 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: legendary_backend
-    command: ["sh", "-c", "composer install --no-interaction --prefer-dist --no-scripts && exec php artisan serve --host=0.0.0.0 --port=8000"]
+    command: ["sh", "-c", "composer install --no-interaction --prefer-dist --no-scripts && exec php artisan serve --host=0.0.0.0 --port=8000 --no-reload"]
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -15,6 +15,24 @@ services:
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
+      - PHP_CLI_SERVER_WORKERS=4
+    networks:
+      - legendary-network
+
+  redis:
+    image: redis:7.4-alpine
+    profiles: ["cache"]
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     networks:
       - legendary-network
 
@@ -38,6 +56,7 @@ services:
 
 volumes:
   backend-vendor:
+  redis-data:
 
 networks:
   legendary-network:

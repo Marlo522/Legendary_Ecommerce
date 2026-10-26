@@ -141,6 +141,8 @@ Catalog listings use a 30-second server cache; details and cart stock checks que
 
 ## Documentation
 
+- [Cloudinary image storage and Redis cache: step-by-step setup](CLOUDINARY_REDIS_SETUP.md)
+
 - [File guide and change explanations](FILE_GUIDE.md)
 - [Backend setup and API contracts](backend/README.md)
 - [Database schema and Supabase setup](backend/database.md)
