@@ -20,6 +20,17 @@ return [
         'frontend_url' => env('FRONTEND_URL', 'http://localhost:5173'),
     ],
 
+    'product_images' => [
+        'driver' => env('PRODUCT_IMAGE_STORAGE', 'local'),
+    ],
+
+    'cloudinary' => [
+        'cloud_name' => env('CLOUDINARY_CLOUD_NAME'),
+        'api_key' => env('CLOUDINARY_API_KEY'),
+        'api_secret' => env('CLOUDINARY_API_SECRET'),
+        'folder' => env('CLOUDINARY_FOLDER', 'legendary/products'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

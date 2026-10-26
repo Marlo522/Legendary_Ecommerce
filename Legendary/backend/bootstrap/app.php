@@ -36,8 +36,14 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $status = $exception instanceof HttpExceptionInterface ? $exception->getStatusCode() : 500;
             $headers = $exception instanceof HttpExceptionInterface ? $exception->getHeaders() : [];
+            $unavailableMessage = match (true) {
+                $request->is('api/auth/*') => 'Authentication is temporarily unavailable.',
+                $request->is('api/catalog/*') => 'The catalog is temporarily unavailable.',
+                $request->is('api/admin/*') => 'Store operations are temporarily unavailable. Please try again.',
+                default => 'Account data is temporarily unavailable.',
+            };
             $message = $status >= 500
-                ? ($status === 503 ? ($request->is('api/auth/*') ? 'Authentication is temporarily unavailable.' : ($request->is('api/catalog/*') ? 'The catalog is temporarily unavailable.' : 'Account data is temporarily unavailable.')) : 'An unexpected error occurred.')
+                ? ($status === 503 ? $unavailableMessage : 'An unexpected error occurred.')
                 : ($exception->getMessage() ?: (Response::$statusTexts[$status] ?? 'Request failed.'));
 
             return response()->json(['message' => $message], $status, $headers);

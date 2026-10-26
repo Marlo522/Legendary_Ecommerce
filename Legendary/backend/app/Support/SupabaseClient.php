@@ -3,12 +3,44 @@
 namespace App\Support;
 
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 class SupabaseClient
 {
     public function request(string $method, string $path, array $data = [], ?string $accessToken = null, array $headers = []): Response
+    {
+        try {
+            $response = $this->client(Http::createPendingRequest(), $accessToken, $headers)->send($method, $path, [
+                $method === 'GET' ? 'query' : 'json' => $data,
+            ]);
+        } catch (ConnectionException) {
+            abort(503, 'Authentication is temporarily unavailable.');
+        }
+
+        return $this->validateResponse($response);
+    }
+
+    /** @param array<string, array{path: string, query: array}> $requests */
+    public function getMany(array $requests, string $accessToken, array $headers = []): array
+    {
+        $responses = Http::pool(function (Pool $pool) use ($requests, $accessToken, $headers): void {
+            foreach ($requests as $name => $request) {
+                $this->client($pool->as($name), $accessToken, $headers)->get($request['path'], $request['query']);
+            }
+        });
+
+        foreach ($responses as $name => $response) {
+            abort_unless($response instanceof Response, 503, 'Account data is temporarily unavailable.');
+            $responses[$name] = $this->validateResponse($response);
+        }
+
+        return $responses;
+    }
+
+    private function client(PendingRequest $client, ?string $accessToken, array $headers): PendingRequest
     {
         $url = config('services.supabase.url');
         $key = config('services.supabase.publishable_key');
@@ -23,7 +55,7 @@ class SupabaseClient
             || (! str_starts_with($key, 'sb_publishable_') && ($legacyKey['role'] ?? null) !== 'anon'),
             503, 'Authentication is temporarily unavailable.');
 
-        $client = Http::baseUrl(rtrim($url, '/'))
+        $client = $client->baseUrl(rtrim($url, '/'))
             ->acceptJson()
             ->asJson()
             ->withHeaders([...$headers, 'apikey' => $key])
@@ -31,18 +63,11 @@ class SupabaseClient
             ->timeout(10)
             ->withoutRedirecting();
 
-        if ($accessToken !== null) {
-            $client = $client->withToken($accessToken);
-        }
+        return $accessToken === null ? $client : $client->withToken($accessToken);
+    }
 
-        try {
-            $response = $client->send($method, $path, [
-                $method === 'GET' ? 'query' : 'json' => $data,
-            ]);
-        } catch (ConnectionException) {
-            abort(503, 'Authentication is temporarily unavailable.');
-        }
-
+    private function validateResponse(Response $response): Response
+    {
         abort_if($response->status() === 429, 429, 'Too many authentication requests. Please try again later.', ['Retry-After' => '60']);
         abort_if($response->serverError() || $response->redirect(), 503, 'Authentication is temporarily unavailable.');
 
