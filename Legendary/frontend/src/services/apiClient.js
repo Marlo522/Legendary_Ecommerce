@@ -1,4 +1,4 @@
-const baseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
+const baseUrl = (import.meta.env?.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
 let csrfToken = null;
 let csrfRequest = null;
 let refreshRequest = null;
@@ -69,8 +69,11 @@ export async function apiRequest(path, { method = 'GET', body, signal, authentic
   async function perform() {
     const headers = {};
     if (method !== 'GET') headers['X-CSRF-TOKEN'] = await ensureCsrf();
-    if (body !== undefined) headers['Content-Type'] = 'application/json';
-    return send(path, { method, headers, signal, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+    const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
+    if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json';
+    const result = await send(path, { method, headers, signal, ...(body === undefined ? {} : { body: isForm ? body : JSON.stringify(body) }) });
+    if (method !== 'GET' && path !== 'auth/refresh') window.dispatchEvent(new Event('api:mutated'));
+    return result;
   }
 
   try {
