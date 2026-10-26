@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../features/auth/useAuth';
+import { prefetchResource } from '../services/resourceCache';
 import SignOutButton from '../components/ui/SignOutButton';
 
 const links = [
@@ -25,6 +26,8 @@ export default function AccountLayout() {
         </select>
         <nav aria-label="Account navigation" className="hidden border-t border-brand-line lg:block">
           {links.map(([path, label]) => <NavLink key={path} to={path} end={path === '/account'}
+            onMouseEnter={() => prefetchResource(path === '/account' ? 'account' : path.slice(1) + '?page=1&per_page=12')}
+            onFocus={() => prefetchResource(path === '/account' ? 'account' : path.slice(1) + '?page=1&per_page=12')}
             className={({ isActive }) => 'block border-b border-brand-line px-3 py-4 text-sm ' + (isActive ? 'bg-brand-black text-brand-white' : 'hover:bg-brand-paper')}>{label}</NavLink>)}
         </nav>
       </aside>

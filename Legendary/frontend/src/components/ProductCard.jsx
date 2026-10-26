@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router';
 import ProductImage from './ProductImage';
 import WishlistButton from './WishlistButton';
 import { money } from '../utils/formatters';
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, imageFit = 'cover' }) {
   const location = useLocation();
   const badge = !product.in_stock ? 'Sold out' : product.original_price ? 'Sale' : product.low_stock ? 'Low stock' : product.is_new_arrival ? 'New' : null;
   const colors = [...new Set(product.variants.map(variant => variant.color))];
@@ -11,7 +11,7 @@ export default function ProductCard({ product }) {
     <WishlistButton product={product} compact />
     <Link to={'/products/' + product.slug} state={{ catalogPath: location.pathname + location.search }} className="block">
       <div className="relative aspect-square overflow-hidden bg-brand-paper">
-        <ProductImage image={product.images[0]} name={product.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+        <ProductImage image={product.images[0]} name={product.name} className={'h-full w-full transition-transform duration-500 group-hover:scale-[1.03] ' + (imageFit === 'contain' ? 'object-contain' : 'object-cover')} />
         {badge && <span className="absolute bottom-3 left-3 bg-brand-white px-3 py-1 text-[0.65rem] font-medium uppercase tracking-wider">{badge}</span>}
       </div>
       <div className="pt-4">

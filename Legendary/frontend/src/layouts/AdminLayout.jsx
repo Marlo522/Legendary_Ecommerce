@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 import { useAuth } from '../features/auth/useAuth';
 import SignOutButton from '../components/ui/SignOutButton';
+import BrandLogo from '../components/BrandLogo';
 
 const links = [
   ['/admin', 'Overview'], ['/admin/orders', 'Orders'],
@@ -16,7 +17,7 @@ export default function AdminLayout() {
     <a href="#admin-main" className="skip-link">Skip to content</a>
     <aside className="border-b border-brand-line bg-brand-black text-brand-white lg:min-h-screen">
       <div className="flex items-center justify-between px-6 py-6 lg:block">
-        <Link to="/admin" className="font-display text-3xl tracking-wider">Legendary</Link>
+        <Link to="/admin" aria-label="Legendary Lifestyle administration" className="inline-block"><BrandLogo className="w-28 lg:w-36" /></Link>
         <p className="text-[0.65rem] uppercase tracking-[0.2em] text-white/60 lg:mt-2">Administration</p>
       </div>
       <nav aria-label="Administration navigation" className="hidden px-3 lg:block">

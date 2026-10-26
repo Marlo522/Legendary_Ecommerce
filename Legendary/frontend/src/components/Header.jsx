@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import BrandLogo from './BrandLogo';
 import { Link } from 'react-router';
 import { useAuth } from '../features/auth/useAuth';
 import { postLoginPath } from '../features/auth/authPaths';
+import { prefetchResource } from '../services/resourceCache';
 import { useStorefront } from '../hooks/useStorefront';
 
 
@@ -17,7 +19,7 @@ export default function Header() {
   return <header id="site-header" className="sticky top-0 z-40 border-b border-brand-line bg-brand-white">
     <div className="mx-auto max-w-[1280px] px-6 lg:px-10">
       <div className="flex h-16 items-center justify-between gap-5 lg:h-20">
-        <Link id="site-logo" to="/" className="font-display text-2xl uppercase tracking-wide lg:text-3xl">Legendary</Link>
+        <Link id="site-logo" to="/" aria-label="Legendary Lifestyle home" className="shrink-0"><BrandLogo inverted className="w-20 sm:w-24 lg:w-28" /></Link>
         <nav aria-label="Main navigation" className="hidden items-center gap-6 lg:flex">
           {links.map(([label, href]) => <Link key={label} to={href} className="text-[0.7rem] font-medium uppercase tracking-wider hover:text-brand-gray">{label}</Link>)}
         </nav>
@@ -27,7 +29,7 @@ export default function Header() {
               <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8Z" />
             </svg>
           </Link>
-          <Link id="account-btn" to={accountPath} className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider hover:text-brand-gray">
+          <Link id="account-btn" to={accountPath} onMouseEnter={() => user && prefetchResource(user.role === 'admin' ? 'admin' : 'account')} onFocus={() => user && prefetchResource(user.role === 'admin' ? 'admin' : 'account')} className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider hover:text-brand-gray">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
               <circle cx="12" cy="7" r="4" /><path d="M4 21v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2" />
             </svg>

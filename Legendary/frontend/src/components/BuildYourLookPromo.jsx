@@ -1,62 +1,19 @@
-import buildYourLookImg from '../assets/build-your-look.jpg';
+import { Link } from 'react-router';
+import buildYourLookImg from '../assets/pictures/622389338_17879499951461814_8096118269373520596_n.jpeg';
 
-/**
- * BuildYourLookPromo — Promotional section for the Build Your Look feature.
- * Design.md §7 homepage order item 7: "Build Your Look promotional section."
- * Uses offset image-and-text composition per Design.md §4 signature language.
- */
 export default function BuildYourLookPromo() {
   return (
-    <section
-      id="build-your-look-promo"
-      className="border-t border-brand-line bg-brand-paper"
-    >
-      <div className="max-w-[1280px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 items-center">
-          {/* Image — offset composition */}
-          <div className="lg:col-span-7 relative overflow-hidden">
-            <img
-              src={buildYourLookImg}
-              alt="Flat lay of a curated outfit: t-shirt, cap, and tote bag"
-              className="w-full h-full object-cover min-h-[40vh] lg:min-h-[60vh]"
-              loading="lazy"
-            />
-            {/* Editorial detail */}
-            <div className="absolute top-6 left-6 lg:top-10 lg:left-10">
-              <span className="editorial-caption text-brand-black bg-brand-white/80 px-3 py-1.5 backdrop-blur-sm">
-                3 pieces — 1 look
-              </span>
-            </div>
-          </div>
-
-          {/* Text block */}
-          <div className="lg:col-span-5 px-6 lg:px-12 xl:px-16 py-16 lg:py-24">
-            <span className="editorial-caption block mb-6">Build your look</span>
-            <h2 className="display-heading text-brand-black text-[2.5rem] lg:text-[3.5rem] xl:text-[4rem] leading-[0.85] mb-6">
-              One tee.
-              <br />
-              One cap.
-              <br />
-              One bag.
-            </h2>
-            <p className="text-brand-gray font-light text-base lg:text-lg max-w-md mb-10 leading-relaxed">
-              Pick your favorites across all three categories, preview the full look together, and add
-              everything to your cart in one click. Color-matched suggestions included.
-            </p>
-            <a
-              href="#"
-              id="build-look-cta"
-              className="inline-flex items-center justify-center bg-brand-black text-brand-white
-                         px-8 py-4 text-[0.75rem] font-semibold tracking-[0.15em] uppercase
-                         hover:bg-brand-gray transition-colors duration-300"
-            >
-              Start building
-              <svg className="ml-3" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12" />
-                <polyline points="12 5 19 12 12 19" />
-              </svg>
-            </a>
-          </div>
+    <section id="build-your-look-promo" aria-labelledby="build-look-heading" className="border-t border-brand-line bg-brand-paper">
+      <div className="mx-auto grid max-w-[1280px] grid-cols-1 items-center lg:grid-cols-12">
+        <figure className="relative lg:col-span-7">
+          <img src={buildYourLookImg} alt="Black Legendary Lifestyle embroidered cap resting on branded tees beside a pool" width="1440" height="1919" className="aspect-[4/5] w-full object-cover object-center lg:aspect-[1/1]" loading="lazy" decoding="async" />
+          <figcaption className="absolute left-6 top-6 bg-brand-white/95 px-3 py-2 text-[0.65rem] uppercase tracking-[0.15em] lg:left-10 lg:top-10">Off duty / On your terms</figcaption>
+        </figure>
+        <div className="px-6 py-14 lg:col-span-5 lg:px-12 lg:py-20 xl:px-16">
+          <p className="editorial-caption mb-6">Build your look</p>
+          <h2 id="build-look-heading" className="display-heading mb-6 text-[2.75rem] leading-[0.9] lg:text-[3.5rem] xl:text-[4rem]">Your tee.<br />Your cap.<br />Your everyday.</h2>
+          <p className="mb-9 max-w-md text-base leading-relaxed text-[#625e58] lg:text-lg">Start with a graphic tee. Top it off with our signature cap. Grab a tote and take the Legendary lifestyle wherever the day leads.</p>
+          <Link to="/shop" id="build-look-cta" className="inline-flex min-h-12 items-center justify-center gap-4 bg-brand-black px-8 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-brand-white transition-colors hover:bg-[#766658]">Find your essentials <span aria-hidden="true">&#8594;</span></Link>
         </div>
       </div>
     </section>

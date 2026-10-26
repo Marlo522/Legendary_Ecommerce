@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { authService } from '../../services/authService';
+import { clearResourceCache } from '../../services/resourceCache';
 import { AuthContext } from './AuthContext';
 
 export function AuthProvider({ children }) {
@@ -50,6 +51,7 @@ export function AuthProvider({ children }) {
   }
 
   async function logout() {
+    clearResourceCache();
     setIsLoggingOut(true);
     try {
       await authService.logout();

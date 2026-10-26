@@ -3,6 +3,7 @@
  * Design.md §7 homepage order item 10: "Footer with links and social media."
  */
 import { Link } from 'react-router';
+import BrandLogo from './BrandLogo';
 import { useStorefront } from '../hooks/useStorefront';
 
 const CURRENT_YEAR = new Date().getFullYear();
@@ -51,9 +52,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-10 lg:gap-16 pt-16 lg:pt-20 pb-14 lg:pb-16">
           {/* Brand column */}
           <div className="col-span-2 md:col-span-1">
-            <span className="font-display text-2xl tracking-[0.04em] uppercase block mb-5">
-              Legendary
-            </span>
+            <Link to="/" aria-label="Legendary Lifestyle home" className="mb-5 inline-block"><BrandLogo className="w-40" /></Link>
             <p className="text-sm text-white/50 leading-relaxed mb-6 max-w-xs">
               T-shirts, caps, and tote bags for the ones who show up every day.
             </p>

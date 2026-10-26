@@ -1,12 +1,17 @@
-import { Link, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { useApiResource } from '../hooks/useApiResource';
 import PageHeading from '../components/ui/PageHeading';
 import { ResourceState } from '../components/ui/ResourceState';
 import StatusBadge from '../components/ui/StatusBadge';
+import { useAdminMutation } from '../hooks/useAdminMutation';
+import { MutationFeedback } from '../components/portal/AdminFields';
 import { formatDate, money } from '../utils/formatters';
 
 export default function OrderDetailPage({ admin = false }) {
   const { orderId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const mutation = useAdminMutation();
   const prefix = admin ? 'admin' : 'account';
   const { data: result, loading, error, retry } = useApiResource(prefix + '/orders/' + encodeURIComponent(orderId));
   const order = result?.data;
@@ -16,6 +21,13 @@ export default function OrderDetailPage({ admin = false }) {
     <PageHeading eyebrow={admin ? 'Store operations / Order details' : 'My account / Order details'} title={order?.order_number || 'Order details'}>
       {order ? 'Placed ' + formatDate(order.created_at) : 'Your order information.'}
     </PageHeading>
+    <MutationFeedback error={mutation.error} success={location.state?.notice || mutation.success} />
+    {admin && order && <div className="mb-6 flex flex-wrap gap-3">
+      <Link className="button-primary" to={'/admin/orders/' + order.id + '/edit'}>Edit order</Link>
+      {['pending', 'cancelled'].includes(order.status) && ['pending', 'failed'].includes(order.payment_status) && <button type="button" className="button-secondary" disabled={mutation.pending} onClick={() => {
+        if (window.confirm('Delete this unpaid order? Its stock will be restored and its history retained.')) mutation.mutate('admin/orders/' + order.id, { method: 'DELETE', body: { updated_at: order.updated_at } }, () => navigate('/admin/orders', { state: { notice: 'Order deleted.' } }), 'Order deleted.');
+      }}>{mutation.pending ? 'Deleting…' : 'Delete order'}</button>}
+    </div>}
     <ResourceState loading={loading} error={error} onRetry={retry} />
     {!loading && !error && order && <>
       <div className="mb-6 flex flex-wrap items-center gap-3"><StatusBadge status={order.status} /><span className="text-sm text-brand-gray">Payment: {order.payment_method || '—'}</span><StatusBadge status={order.payment_status} /></div>
@@ -24,6 +36,7 @@ export default function OrderDetailPage({ admin = false }) {
         <tbody>{order.items.map(item => <tr key={item.id}><th scope="row"><p className="font-medium">{item.product_name}</p><p className="text-xs font-normal text-brand-gray">{item.variant_label}</p></th>
           <td>{item.quantity}</td><td>{money(item.unit_price)}</td><td className="text-right">{money(item.line_total)}</td></tr>)}</tbody>
       </table></div>
+      {admin && order.notes && <p className="mt-5 whitespace-pre-wrap border border-brand-line p-4 text-sm">Notes: {order.notes}</p>}
       <div className="mt-7 grid gap-6 md:grid-cols-2">
         <section className="border border-brand-line bg-brand-white p-6"><h2 className="mb-4 font-display text-2xl">Delivery details</h2>
           {address ? <address className="text-sm not-italic leading-7">

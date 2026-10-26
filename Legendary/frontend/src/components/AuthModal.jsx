@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import authImage from '../assets/auth-editorial.jpg';
+import BrandLogo from './BrandLogo';
 
 export default function AuthModal({ isOpen = false, onClose, onLogin, onAuthSuccess, initialMode = 'login' }) {
   const dialog = useRef(null);
@@ -71,7 +72,7 @@ export default function AuthModal({ isOpen = false, onClose, onLogin, onAuthSucc
       <div className="relative hidden min-h-[550px] bg-brand-black text-brand-white lg:block">
         <img src={authImage} alt="Legendary streetwear collection" className="absolute inset-0 h-full w-full object-cover object-top opacity-60" />
         <div className="relative flex h-full flex-col justify-between bg-brand-black/25 p-9">
-          <p className="font-display text-4xl tracking-wider">Legendary</p>
+          <BrandLogo className="w-36" />
           <div><p className="mb-4 text-xs uppercase tracking-[0.2em]">Your everyday legend</p>
             <p className="font-display text-6xl leading-none">Good to<br />have you back.</p>
             <p className="mt-5 max-w-xs text-sm text-white/80">Your orders, saved pieces, and next everyday favourites. All in one place.</p>

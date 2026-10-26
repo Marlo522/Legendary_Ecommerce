@@ -11,6 +11,8 @@ import AddressesPage from '../pages/account/AddressesPage';
 import WishlistPage from '../pages/account/WishlistPage';
 import AdminOverviewPage from '../pages/admin/AdminOverviewPage';
 import ProductsPage from '../pages/admin/ProductsPage';
+import ProductEditorPage from '../pages/admin/ProductEditorPage';
+import OrderEditorPage from '../pages/admin/OrderEditorPage';
 import CustomersPage from '../pages/admin/CustomersPage';
 import OrdersPage from '../pages/OrdersPage';
 import OrderDetailPage from '../pages/OrderDetailPage';
@@ -56,6 +58,10 @@ export default function AppRoutes() {
         <Route path="orders" element={<OrdersPage admin />} />
         <Route path="orders/:orderId" element={<OrderDetailPage admin />} />
         <Route path="products" element={<ProductsPage />} />
+        <Route path="products/new" element={<ProductEditorPage />} />
+        <Route path="products/:productId" element={<ProductEditorPage />} />
+        <Route path="orders/new" element={<OrderEditorPage />} />
+        <Route path="orders/:orderId/edit" element={<OrderEditorPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>

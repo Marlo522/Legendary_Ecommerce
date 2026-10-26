@@ -1,71 +1,36 @@
 import { Link } from 'react-router';
-import heroImg from '../assets/hero-lifestyle.jpg';
+import heroImg from '../assets/pictures/481088805_994430486084644_4070894412361349226_n.jpg';
 
-/**
- * HeroSection — Full-width editorial hero.
- * Design.md §7: "A split-screen or off-center hero is preferred over a generic centered banner."
- * One strong image, one short statement, one clear CTA.
- */
 export default function HeroSection() {
   return (
-    <section id="hero" className="relative bg-brand-paper">
-      <div className="max-w-[1280px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[75vh] lg:min-h-[85vh]">
-          {/* Left: Editorial text — off-center, oversized */}
-          <div className="lg:col-span-5 flex flex-col justify-center px-6 lg:px-10 py-16 lg:py-24 order-2 lg:order-1">
-            <span className="editorial-caption mb-6">Drop 01 — Everyday Uniform</span>
-
-            <h1 className="display-heading text-brand-black text-[3.5rem] sm:text-[4.5rem] lg:text-[6rem] xl:text-[7rem] leading-[0.85] mb-8">
-              Wear
-              <br />
-              Your
-              <br />
-              <span className="text-brand-gray">Legend</span>
-            </h1>
-
-            <p className="text-brand-gray font-light text-base lg:text-lg max-w-sm mb-10 leading-relaxed">
-              T-shirts, caps, and tote bags built for the ones who show up daily and make it count.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link
-                to="/shop"
-                id="hero-cta-primary"
-                className="inline-flex items-center justify-center bg-brand-black text-brand-white
-                           px-8 py-4 text-[0.75rem] font-semibold tracking-[0.15em] uppercase
-                           hover:bg-brand-gray transition-colors duration-300"
-              >
-                Shop the collection
-              </Link>
-              <a
-                href="#"
-                id="hero-cta-secondary"
-                className="inline-flex items-center justify-center border border-brand-black text-brand-black
-                           px-8 py-4 text-[0.75rem] font-semibold tracking-[0.15em] uppercase
-                           hover:bg-brand-black hover:text-brand-white transition-colors duration-300"
-              >
-                Build your look
-              </a>
-            </div>
+    <section id="hero" aria-labelledby="hero-heading" className="bg-brand-paper">
+      <div className="mx-auto grid max-w-[1280px] grid-cols-1 lg:grid-cols-12">
+        <div className="order-2 flex flex-col justify-center px-6 py-12 lg:order-1 lg:col-span-5 lg:px-10 lg:py-20">
+          <p className="editorial-caption mb-6 text-[#655c55]">Legendary Lifestyle / Everyday essentials</p>
+          <h1 id="hero-heading" className="display-heading mb-7 text-[3.75rem] leading-[0.85] text-brand-black sm:text-[5rem] lg:text-[6rem] xl:text-[7rem]">
+            Wear<br />Your<br /><span className="text-[#766658]">Legend</span>
+          </h1>
+          <p className="mb-8 max-w-sm text-base leading-relaxed text-[#625e58] lg:text-lg">
+            Graphic tees, signature caps, and carry-everywhere totes. Make the everyday your own.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <Link to="/shop" id="hero-cta-primary" className="inline-flex min-h-12 items-center justify-center bg-brand-black px-7 py-4 text-xs font-semibold uppercase tracking-[0.12em] text-brand-white transition-colors hover:bg-[#766658]">
+              Shop the collection
+            </Link>
+            <a href="#brand-story" id="hero-cta-secondary" className="inline-flex min-h-12 items-center gap-3 px-1 py-4 text-xs font-medium uppercase tracking-[0.12em] underline underline-offset-4">
+              The Legendary lifestyle <span aria-hidden="true">&#8599;</span>
+            </a>
           </div>
-
-          {/* Right: Hero image — editorial crop, off-center */}
-          <div className="lg:col-span-7 relative overflow-hidden order-1 lg:order-2">
-            <img
-              src={heroImg}
-              alt="Person wearing Legendary Lifestyle black t-shirt, cap, and tote bag"
-              className="w-full h-full object-cover object-top min-h-[50vh] lg:min-h-full"
-              loading="eager"
-              fetchPriority="high"
-            />
-            {/* Editorial overlay detail */}
-            <div className="absolute bottom-6 right-6 lg:bottom-10 lg:right-10">
-              <span className="editorial-caption text-brand-white bg-brand-black/60 px-3 py-1.5 backdrop-blur-sm">
-                Field notes — Vol. I
-              </span>
-            </div>
-          </div>
+          <p className="mt-10 border-t border-brand-line pt-5 text-[0.65rem] uppercase tracking-[0.18em] text-[#655c55]">Be legend. Be rare.</p>
         </div>
+        <figure className="order-1 flex min-w-0 flex-col bg-[#9e8b80] lg:order-2 lg:col-span-7">
+          <div className="relative aspect-[3/2] overflow-hidden sm:aspect-[4/3] lg:aspect-auto lg:min-h-[640px] lg:flex-1">
+            <img src={heroImg} alt="Legend Is Rare print on a dark brown Legendary T-shirt, with branded neck and sleeve labels" width="1776" height="1184" className="absolute inset-0 h-full w-full object-cover object-[42%_center]" loading="eager" fetchPriority="high" />
+          </div>
+          <figcaption className="flex items-center justify-between gap-4 bg-[#e8e0d8] px-6 py-4 text-[0.65rem] uppercase tracking-[0.15em] text-[#554a40]">
+            <span>In focus / Legend is rare</span><span>Legendary Lifestyle</span>
+          </figcaption>
+        </figure>
       </div>
     </section>
   );
