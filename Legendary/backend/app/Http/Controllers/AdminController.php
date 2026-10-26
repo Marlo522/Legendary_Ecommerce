@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AdminListRequest;
 use App\Http\Requests\PaginationRequest;
 use App\Repositories\PortalRepository;
 use App\Services\PortalService;
@@ -17,11 +18,12 @@ class AdminController extends Controller
         return response()->json(['data' => $this->portal->adminOverview($request->session()->get('supabase.access_token'))]);
     }
 
-    public function orders(PaginationRequest $request): JsonResponse
+    public function orders(AdminListRequest $request): JsonResponse
     {
         return response()->json($this->data->orders(
             $request->session()->get('supabase.access_token'), null,
             $request->integer('page', 1), $request->integer('per_page', 12),
+            $request->filters(),
         ));
     }
 
@@ -30,11 +32,12 @@ class AdminController extends Controller
         return response()->json(['data' => $this->data->order($request->session()->get('supabase.access_token'), $order)]);
     }
 
-    public function products(PaginationRequest $request): JsonResponse
+    public function products(AdminListRequest $request): JsonResponse
     {
         return response()->json($this->portal->products(
             $request->session()->get('supabase.access_token'),
             $request->integer('page', 1), $request->integer('per_page', 12),
+            $request->filters(),
         ));
     }
 
