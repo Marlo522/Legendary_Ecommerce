@@ -10,9 +10,10 @@ class PortalService
 
     public function accountOverview(string $token, string $userId): array
     {
-        $orders = $this->data->orders($token, $userId, 1, 5);
-        $wishlist = $this->data->wishlist($token, $userId, 1, 1);
-        $addresses = $this->data->addresses($token, $userId, 1, 1);
+        $summary = $this->data->accountSummary($token, $userId);
+        $orders = $summary['orders'];
+        $wishlist = $summary['wishlist'];
+        $addresses = $summary['addresses'];
 
         return [
             'stats' => [
@@ -40,9 +41,9 @@ class PortalService
         ];
     }
 
-    public function products(string $token, int $page, int $perPage): array
+    public function products(string $token, int $page, int $perPage, array $filters = []): array
     {
-        $result = $this->data->products($token, $page, $perPage);
+        $result = $this->data->products($token, $page, $perPage, $filters);
         $result['data'] = array_map(function (array $product): array {
             $activeVariants = array_filter($product['variants'] ?? [], fn (array $variant): bool => (bool) $variant['is_active']);
             $product['stock_quantity'] = array_sum(array_column($activeVariants, 'stock_quantity'));
