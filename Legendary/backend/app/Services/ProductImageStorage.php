@@ -6,6 +6,7 @@ use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -30,6 +31,17 @@ class ProductImageStorage
                 ->post($this->endpoint('upload'), ['public_id' => $publicId, 'overwrite' => 'false']);
         } catch (ConnectionException) {
             abort(503, 'Image storage is temporarily unavailable.');
+        }
+
+        if (in_array($response->status(), [401, 403], true)) {
+            $cloudNameMismatch = $response->json('error.message') === 'cloud_name mismatch';
+            Log::warning('Cloudinary image upload authentication failed.', [
+                'status' => $response->status(),
+                'reason' => $cloudNameMismatch ? 'cloud_name_mismatch' : 'credentials_rejected',
+            ]);
+            abort(503, $cloudNameMismatch
+                ? 'Cloudinary credentials do not match the configured cloud name. Check CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in backend/.env.'
+                : 'Cloudinary rejected the image storage credentials. Check CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET in backend/.env.');
         }
 
         $url = $response->json('secure_url');

@@ -7,6 +7,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SupabaseClient
 {
@@ -17,6 +18,7 @@ class SupabaseClient
                 $method === 'GET' ? 'query' : 'json' => $data,
             ]);
         } catch (ConnectionException) {
+            Log::warning('Supabase connection failed.', ['method' => $method, 'path' => strtok($path, '?')]);
             abort(503, 'Authentication is temporarily unavailable.');
         }
 
@@ -69,6 +71,9 @@ class SupabaseClient
     private function validateResponse(Response $response): Response
     {
         abort_if($response->status() === 429, 429, 'Too many authentication requests. Please try again later.', ['Retry-After' => '60']);
+        if ($response->serverError() || $response->redirect()) {
+            Log::warning('Supabase upstream request failed.', ['status' => $response->status(), 'code' => $response->json('code')]);
+        }
         abort_if($response->serverError() || $response->redirect(), 503, 'Authentication is temporarily unavailable.');
 
         return $response;
