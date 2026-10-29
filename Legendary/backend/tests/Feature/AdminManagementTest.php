@@ -497,6 +497,24 @@ class AdminManagementTest extends TestCase
             && ! isset($request['api_secret']));
     }
 
+    public function test_cloudinary_cloud_name_mismatch_returns_an_actionable_error(): void
+    {
+        $this->authenticate();
+        $this->configureCloudinary();
+        Http::fake([
+            'https://supabase.test/rest/v1/products*' => Http::response([['id' => 1]]),
+            'https://api.cloudinary.com/*' => Http::response(['error' => ['message' => 'cloud_name mismatch']], 401),
+        ]);
+
+        $this->post('/api/admin/products/1/images', $this->imagePayload(), ['Accept' => 'application/json'])
+            ->assertStatus(503)
+            ->assertJsonPath('code', 'image_storage_unavailable')
+            ->assertJsonPath('message', 'Cloudinary credentials do not match the configured cloud name. Check CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in backend/.env.')
+            ->assertDontSee('test-secret');
+
+        Http::assertNotSent(fn (Request $request): bool => str_contains($request->url(), '/rest/v1/product_images'));
+    }
+
     public function test_cloudinary_failure_does_not_create_an_image_record(): void
     {
         $this->authenticate();
@@ -507,7 +525,10 @@ class AdminManagementTest extends TestCase
         ]);
 
         $this->post('/api/admin/products/1/images', $this->imagePayload(), ['Accept' => 'application/json'])
-            ->assertStatus(503)->assertDontSee('test-secret');
+            ->assertStatus(503)
+            ->assertJsonPath('code', 'image_storage_unavailable')
+            ->assertJsonPath('message', 'Cloudinary rejected the image storage credentials. Check CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET in backend/.env.')
+            ->assertDontSee('test-secret');
 
         Http::assertNotSent(fn (Request $request): bool => str_contains($request->url(), '/rest/v1/product_images'));
     }
