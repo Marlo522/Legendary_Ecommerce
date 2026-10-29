@@ -36,6 +36,20 @@ return Application::configure(basePath: dirname(__DIR__))
 
             $status = $exception instanceof HttpExceptionInterface ? $exception->getStatusCode() : 500;
             $headers = $exception instanceof HttpExceptionInterface ? $exception->getHeaders() : [];
+            $imageStorageMessages = [
+                'Cloudinary credentials do not match the configured cloud name. Check CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET in backend/.env.',
+                'Cloudinary rejected the image storage credentials. Check CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET in backend/.env.',
+                'Image storage is not configured.',
+                'Image storage is temporarily unavailable.',
+                'The image could not be uploaded.',
+                'The image could not be saved.',
+            ];
+            if ($status === 503 && $request->isMethod('POST') && $request->is('api/admin/products/*/images')
+                && in_array($exception->getMessage(), $imageStorageMessages, true)) {
+                return response()->json([
+                    'message' => $exception->getMessage(), 'code' => 'image_storage_unavailable',
+                ], $status, $headers);
+            }
             $unavailableMessage = match (true) {
                 $request->is('api/auth/*') => 'Authentication is temporarily unavailable.',
                 $request->is('api/catalog/*') => 'The catalog is temporarily unavailable.',
