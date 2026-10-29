@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Support\SupabaseClient;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class AdminRepository
@@ -66,6 +67,12 @@ class AdminRepository
             $field = $code === '23505' ? (str_contains($path, 'variants') ? 'sku' : 'slug') : 'operation';
             $message = $code === 'P0001' ? $response->json('message') : ($code === '23505' ? 'This value is already in use.' : 'The submitted values are invalid.');
             throw ValidationException::withMessages([$field => $message]);
+        }
+        if (! $response->successful() || (! is_array($response->json()) && ! is_int($response->json()))) {
+            Log::warning('Supabase admin request failed.', [
+                'method' => $method, 'path' => $path, 'status' => $response->status(),
+                'code' => $code,
+            ]);
         }
         abort_unless($response->successful() && (is_array($response->json()) || is_int($response->json())),
             503, 'Store operations are temporarily unavailable.');
