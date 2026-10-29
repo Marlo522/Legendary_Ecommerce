@@ -212,3 +212,35 @@ test('order form submits variant IDs and quantities with no display prices', asy
   assert.equal(Object.hasOwn(body, 'total'), false);
   assert.deepEqual(errors, []);
 });
+
+
+test('variant pickers support presets, custom colors and SKUs, and dropdown sizes', async () => {
+  await open('/admin/products/1');
+  await fill('Color', 'Navy');
+  await fill('Size', 'XL');
+  assert.equal(await evaluate('document.querySelector("input[name=color_hex]").value'), '#000080');
+  assert.equal(await evaluate('document.querySelector("select[name=size]").value'), 'XL');
+  const suggested = await evaluate('document.querySelector("input[name=sku]").value');
+  assert.ok(suggested.endsWith('-NAVY-XL'));
+  await fill('SKU', 'CUSTOM-NAVY');
+  await fill('Color', 'Ocean mist');
+  await fill('Size', 'M');
+  assert.equal(await evaluate('document.querySelector("input[name=sku]").value'), 'CUSTOM-NAVY');
+  await fill('Color hex', '#12ABCD');
+  assert.equal(await evaluate('document.querySelector("input[type=color]").value'), '#12abcd');
+  await evaluate('(' + (() => {
+    const picker = document.querySelector('input[type=color]');
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(picker, '#123456');
+    picker.dispatchEvent(new Event('input', { bubbles: true }));
+    picker.dispatchEvent(new Event('change', { bubbles: true }));
+  }).toString() + ')()');
+  assert.equal(await evaluate('document.querySelector("input[name=color_hex]").value'), '#123456');
+  await click('Add variant');
+  await until(() => evaluate('document.querySelector("#admin-main").textContent.includes("Changes saved.")'), 'Variant did not save.');
+  const body = await evaluate('window.__adminTest.writes[0].body');
+  assert.equal(body.color, 'Ocean mist');
+  assert.equal(body.color_hex, '#123456');
+  assert.equal(body.sku, 'CUSTOM-NAVY');
+  assert.equal(body.size, 'M');
+  assert.deepEqual(errors, []);
+});

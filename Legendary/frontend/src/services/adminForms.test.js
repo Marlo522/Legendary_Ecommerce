@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { orderIsLocked, orderPayload, paymentOptions, statusOptions } from './adminForms.js';
+import { orderIsLocked, orderPayload, paymentOptions, statusOptions, suggestedVariantSku } from './adminForms.js';
 
 test('fulfillment only offers valid next statuses', () => {
   assert.deepEqual(statusOptions('pending'), ['pending', 'confirmed', 'cancelled']);
@@ -27,4 +27,13 @@ test('paid, shipped, completed and cancelled orders lock item amounts', () => {
 test('order submission strips display prices and normalizes selected quantities', () => {
   const body = orderPayload({ items: [{ variant_id: '7', quantity: '2', unit_price: 1, label: 'Preview' }], shipping_fee: '', discount_amount: '25.50', updated_at: 'version' });
   assert.deepEqual(body, { items: [{ variant_id: 7, quantity: 2 }], shipping_fee: 0, discount_amount: '25.50', updated_at: 'version' });
+});
+
+
+test('suggested variant SKUs avoid existing SKUs and retain the SKU when editing', () => {
+  const product = { id: 7, slug: 'everyday-tee', variants: [{ id: 3, sku: 'EVERYDAY-TEE-7-BLACK-M' }] };
+  assert.equal(suggestedVariantSku(product, { color: 'Black', size: 'M' }), 'EVERYDAY-TEE-7-BLACK-M-2');
+  assert.equal(suggestedVariantSku(product, { id: 3, color: 'Black', size: 'M' }), 'EVERYDAY-TEE-7-BLACK-M');
+  assert.equal(suggestedVariantSku(product, { color: '', size: '' }), '');
+  assert.equal(suggestedVariantSku(product, { color: 'Ocean blue', size: '' }), 'EVERYDAY-TEE-7-OCEAN-BLUE-OS');
 });
